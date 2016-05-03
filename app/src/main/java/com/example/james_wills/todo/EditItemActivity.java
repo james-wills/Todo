@@ -8,22 +8,24 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 public class EditItemActivity extends AppCompatActivity {
-  int position;
+  private int position;
+  private EditText etEditItem;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_edit_item);
 
-    position = getIntent().getIntExtra(TodoActivity.POSITION_EXTRA, 0);
+    position = getIntent().getIntExtra(TodoActivity.POSITION_EXTRA, -1);
     String name = getIntent().getStringExtra(TodoActivity.NAME_EXTRA);
 
-    EditText etEditItem = (EditText)findViewById(R.id.etEditItem);
+    etEditItem = (EditText)findViewById(R.id.etEditItem);
     etEditItem.setText(name);
+
+    setTitle("Edit Item");
   }
 
   public void onSaveItem(View v) {
-    EditText etEditItem = (EditText)findViewById(R.id.etEditItem);
     String newName = etEditItem.getText().toString();
     Intent i = new Intent();
     i.putExtra(TodoActivity.NAME_EXTRA, newName);

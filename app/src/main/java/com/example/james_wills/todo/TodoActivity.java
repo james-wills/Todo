@@ -9,21 +9,16 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class TodoActivity extends AppCompatActivity {
-  private final String FILE_NAME = "todo.txt";
   private final int EDIT_REQUEST_CODE = 1;
 
   public static final String NAME_EXTRA = "todoName";
-  public static final String POSITION_EXTRA = "todoPosition";
+  public static final String POSITION_EXTRA = "todoID";
 
-  ArrayList<String> items;
-  ArrayAdapter<String> itemsAdapter;
+  ArrayList<TodoItem> items;
+  ArrayAdapter<TodoItem> itemsAdapter;
   ListView lvItems;
 
   @Override
@@ -34,7 +29,7 @@ public class TodoActivity extends AppCompatActivity {
     lvItems = (ListView)findViewById(R.id.lvItems);
 
     readItems();
-    itemsAdapter = new ArrayAdapter<String>(this,
+    itemsAdapter = new ArrayAdapter<TodoItem>(this,
             android.R.layout.simple_list_item_1, items);
     lvItems.setAdapter(itemsAdapter);
 
@@ -43,18 +38,14 @@ public class TodoActivity extends AppCompatActivity {
 
   public void onAddItem(View v) {
     EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
-    String itemText = etNewItem.getText().toString();
-    itemsAdapter.add(itemText);
+    addItem(etNewItem.getText().toString());
     etNewItem.setText("");
-    writeItems();
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent i) {
     if (resultCode == RESULT_OK && requestCode == EDIT_REQUEST_CODE) {
-      items.set(i.getIntExtra(POSITION_EXTRA, -1), i.getStringExtra(NAME_EXTRA));
-      itemsAdapter.notifyDataSetChanged();
-      writeItems();
+      updateItem(i.getIntExtra(POSITION_EXTRA, -1), i.getStringExtra(NAME_EXTRA));
     }
   }
 
@@ -62,9 +53,7 @@ public class TodoActivity extends AppCompatActivity {
     lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
       @Override
       public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
-        items.remove(pos);
-        itemsAdapter.notifyDataSetChanged();
-        writeItems();
+        removeItem(pos);
         return true;
       }
     });
@@ -72,8 +61,9 @@ public class TodoActivity extends AppCompatActivity {
     lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> adapter, View item, int pos, long id) {
+        TodoItem todoItem = items.get(pos);
         Intent i = new Intent(TodoActivity.this, EditItemActivity.class);
-        i.putExtra(NAME_EXTRA, items.get(pos));
+        i.putExtra(NAME_EXTRA, items.get(pos).toString());
         i.putExtra(POSITION_EXTRA, pos);
         startActivityForResult(i, EDIT_REQUEST_CODE);
       }
@@ -81,22 +71,26 @@ public class TodoActivity extends AppCompatActivity {
   }
 
   private void readItems() {
-    File filesDir = getFilesDir();
-    File todoFile = new File(filesDir, FILE_NAME);
-    try {
-      items = new ArrayList<String>(FileUtils.readLines(todoFile));
-    } catch (IOException e) {
-      items = new ArrayList<String>();
-    }
+    items = new ArrayList<TodoItem>(TodoItem.listAll(TodoItem.class));
   }
 
-  private void writeItems() {
-    File filesDir = getFilesDir();
-    File todoFile = new File(filesDir, FILE_NAME);
-    try {
-      FileUtils.writeLines(todoFile, items);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  private void removeItem(int position) {
+    TodoItem t = items.get(position);
+    t.delete();
+    items.remove(position);
+    itemsAdapter.notifyDataSetChanged();
+  }
+
+  private void addItem(String name) {
+    TodoItem t = new TodoItem(name);
+    t.save();
+    itemsAdapter.add(t);
+  }
+
+  private void updateItem(int pos, String name) {
+    TodoItem t = items.get(pos);
+    t.setName(name);
+    t.save();
+    itemsAdapter.notifyDataSetChanged();
   }
 }
