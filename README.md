@@ -6,7 +6,10 @@ At the moment it does not include any extra features beyond what was required, b
 
 Walkthrough:
 
-<img width="25%" src="screenshots/todowalkthrough1.gif">
+<img width="50%" src="screenshots/TodoGif2.gif">
 
 Extra features:
-TodoItems are persisted in a SugarReccord SQLite db.
+
+- TodoItems are persisted in a SugarReccord SQLite db.
+- Used a custom adapter to display custom row styles for each todo item
+- Added priorities to each TodoItem
