@@ -7,3 +7,6 @@ At the moment it does not include any extra features beyond what was required, b
 Walkthrough:
 
 <img width="25%" src="screenshots/todowalkthrough1.gif">
+
+Extra features:
+TodoItems are persisted in a SugarReccord SQLite db.
